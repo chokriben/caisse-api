@@ -32,10 +32,6 @@ class AuthController extends Controller
     ]);
 }
 
-
-    /**
-     * Déconnexion
-     */
     public function logout(Request $request)
     {
         $request->user()->currentAccessToken()->delete();
@@ -69,5 +65,13 @@ class AuthController extends Controller
         'user' => $user
     ], 201);
 }
+public function getUsers()
+    {
+        $users = User::all();
+
+        return response()->json([
+            'users' => $users,
+        ]);
+    }
 
 }
