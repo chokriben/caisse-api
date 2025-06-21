@@ -11,17 +11,21 @@ class AuthController extends Controller
     /**
      * Connexion avec code + gestion rôles
      */
-  public function login(Request $request)
+public function login(Request $request)
 {
     $request->validate([
-        'code' => 'required|string',
         'password' => 'required|string',
     ]);
 
-    $user = User::where('code', $request->code)->first();
+    // Rechercher un utilisateur par mot de passe (hash)
+    $users = User::all();
 
-    if (!$user || !Hash::check($request->password, $user->password)) {
-        return response()->json(['message' => 'Identifiants incorrects.'], 401);
+    $user = $users->first(function ($u) use ($request) {
+        return Hash::check($request->password, $u->password);
+    });
+
+    if (!$user) {
+        return response()->json(['message' => 'Mot de passe incorrect.'], 401);
     }
 
     $token = $user->createToken('api-token')->plainTextToken;

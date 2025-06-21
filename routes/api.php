@@ -5,6 +5,7 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\Api\ProductController;
 use App\Http\Controllers\Api\SaleController;
+use App\Http\Controllers\Api\CashClosureController;
 
 /*
 |--------------------------------------------------------------------------
@@ -28,9 +29,13 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/user', function (Request $request) {
         return $request->user();
     });
- Route::get('/users', [AuthController::class, 'getUsers']);
+  Route::get('/users', [AuthController::class, 'getUsers']);
 
+   Route::post('/close-cash', [CashClosureController::class, 'closeCashRegister']);
+   // Route pour voir la clôture
+    Route::get('/closures', [CashClosureController::class, 'getClosures']);
 });
+
 
  // Produits
     Route::prefix('products')->group(function () {
