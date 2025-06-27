@@ -1,4 +1,5 @@
 <?php
+
 namespace App\Http\Controllers\Api;
 
 use Carbon\Carbon;
@@ -62,46 +63,53 @@ class SaleController extends Controller
         return $sale;
     }
 
+    public function stats()
+    {
+        $today = Carbon::today();
+        $weekStart = Carbon::now()->startOfWeek();
 
-public function stats()
+        $salesToday = DB::table('sales')->whereDate('created_at', $today)->count();
+        $totalToday = DB::table('sales')->whereDate('created_at', $today)->sum('total');
+
+        $salesThisWeek = DB::table('sales')->whereBetween('created_at', [$weekStart, now()])->count();
+        $totalThisWeek = DB::table('sales')->whereBetween('created_at', [$weekStart, now()])->sum('total');
+
+        return response()->json([
+            'tickets_today' => $salesToday,
+            'total_today' => $totalToday,
+            'tickets_week' => $salesThisWeek,
+            'total_week' => $totalThisWeek,
+        ]);
+    }
+
+    public function closeDay()
+    {
+        $total = Sale::whereDate('created_at', today())->sum('total');
+        $count = Sale::whereDate('created_at', today())->count();
+
+        // Logique pour réinitialiser ou archiver ici
+        Sale::whereDate('created_at', today())->delete();
+
+        return response()->json([
+            'total' => $total,
+            'ticket_count' => $count,
+        ]);
+    }
+
+    public function monthlyStats()
 {
-    $today = Carbon::today();
-    $weekStart = Carbon::now()->startOfWeek();
+    $monthly = Sale::selectRaw('MONTH(created_at) as month, SUM(total) as total')
+        ->groupByRaw('MONTH(created_at)')
+        ->orderByRaw('MONTH(created_at)')
+        ->get()
+        ->map(function ($item) {
+            return [
+                'month' => Carbon::create()->month($item->month)->format('M'), // Jan, Feb, etc.
+                'sales' => $item->total,
+            ];
+        });
 
-    $salesToday = DB::table('sales')
-        ->whereDate('created_at', $today)
-        ->count();
-
-    $totalToday = DB::table('sales')
-        ->whereDate('created_at', $today)
-        ->sum('total');
-
-    $salesThisWeek = DB::table('sales')
-        ->whereBetween('created_at', [$weekStart, now()])
-        ->count();
-
-    $totalThisWeek = DB::table('sales')
-        ->whereBetween('created_at', [$weekStart, now()])
-        ->sum('total');
-
-    return response()->json([
-        'tickets_today' => $salesToday,
-        'total_today' => $totalToday,
-        'tickets_week' => $salesThisWeek,
-        'total_week' => $totalThisWeek,
-    ]);
+    return response()->json($monthly);
 }
-public function closeDay()
-{
-    $total = Sale::whereDate('created_at', today())->sum('total');
-    $count = Sale::whereDate('created_at', today())->count();
 
-    // Logique pour réinitialiser ou archiver ici
-    Sale::whereDate('created_at', today())->delete();
-
-    return response()->json([
-        'total' => $total,
-        'ticket_count' => $count,
-    ]);
-}
 }

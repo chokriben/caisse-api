@@ -185,4 +185,12 @@ return [
         // 'Example' => App\Facades\Example::class,
     ])->toArray(),
 
+     /*
+    |--------------------------------------------------------------------------
+
+    | licencee
+    */
+    'license_expire_date' => env('LICENSE_EXPIRE_DATE', null),
+
+
 ];

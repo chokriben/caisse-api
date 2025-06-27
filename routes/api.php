@@ -34,8 +34,10 @@ Route::middleware('auth:sanctum')->group(function () {
    Route::post('/close-cash', [CashClosureController::class, 'closeCashRegister']);
    // Route pour voir la clôture
     Route::get('/closures', [CashClosureController::class, 'getClosures']);
-});
 
+
+});
+   Route::get('/sales/monthly-stats', [SaleController::class, 'monthlyStats']);
 
  // Produits
     Route::prefix('products')->group(function () {
